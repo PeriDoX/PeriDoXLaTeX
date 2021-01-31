@@ -1,0 +1,52 @@
+!config
+identifier: remove
+name: Remove
+authors:
+- Paulo Cereda
+commands:
+- name: The removal feature
+  command: >
+    @{
+      entries = listFilesByPatterns(
+                    toFile(directory),
+                    patterns,
+                    recursive);
+      prefix = [];
+        if (isUnix()) {
+            prefix = [ 'rm', '-f' ];
+        }
+        else {
+            prefix = [ 'cmd', '/c', 'del' ];
+        }
+        removals = [];
+        for (entry : entries) {
+            removals.add(getCommand(prefix,
+                     entry.getCanonicalPath()));
+        }
+        return removals;
+    }
+arguments:
+- identifier: directory
+  flag: >
+    @{
+        return parameters.directory
+    }
+  default: '.'
+- identifier: recursive
+  flag: >
+    @{
+        return isTrue(parameters.recursive)
+    }
+  default: >
+    @{
+        return false
+    }
+- identifier: patterns
+  flag: >
+    @{
+        if (!isList(parameters.patterns)) {
+            throwError('I was expecting a list!');
+        }
+        return parameters.patterns;
+    }
+  required: true
